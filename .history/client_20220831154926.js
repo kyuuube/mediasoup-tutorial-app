@@ -355,6 +355,7 @@ async function subcribeToDataChannel(remoteProducerId) {
       .catch(errback);
   });
   transport.on('connectionstatechange', async (state) => {
+    console.log(state)
     switch (state) {
       case 'connecting':
         console.log("Connecting to consumer for data transport = " + transport.id)
@@ -380,11 +381,8 @@ async function subcribeToDataChannel(remoteProducerId) {
   console.log("REMOTE PRODUCER ID = " + remoteProducerId)
   
   const stream = await consumeData(transport, remoteProducerId)
-  console.log(stream) 
-  stream.on('open', () =>{
-    console.log('stream open')
-  })
-  stream.on('message', async (data) => {
+  console.log(stream)
+  stream.on('open', async (data) => {
 
     const chat = document.getElementById('chatWindow')
 

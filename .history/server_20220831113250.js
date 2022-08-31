@@ -195,7 +195,6 @@ async function runSocketServer() {
 
     socket.on('connectDataConsumerTransport', async (data, callback) => {
       console.log("Connecting Data Consumer Transport")
-      console.log(data)
       const consumerTransport = transports.find(transportData => (
         transportData.consumer && transportData.transport.id == data.transportId && data.dataChannel
       )).transport

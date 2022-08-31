@@ -140,11 +140,11 @@ async function initializeDataChannel(){
 function sendMessage(){
   console.log("Sending message to the server")
   let message = document.getElementById("chatInput").value
-
+  console.log(dataChannelProducer)
   dataChannelProducer.then((produce)=>{
-    produce.on("open", () => {
-      produce.send(message);
-    })
+    console.log(produce)
+    produce.send(message);
+
     const chat = document.getElementById('chatWindow')
 
     const newElem = document.createElement('div')
@@ -165,6 +165,8 @@ function sendMessage(){
                           </article>'
       
     chatWindow.appendChild(newElem)
+  }).catch(e => {
+    console.log(e)
   })
 
 }
@@ -368,7 +370,6 @@ async function subcribeToDataChannel(remoteProducerId) {
         break;
 
       case 'failed':
-      case 'disconnected':
         transport.close();
         console.log("Consumer failed")
         break;
@@ -380,10 +381,6 @@ async function subcribeToDataChannel(remoteProducerId) {
   console.log("REMOTE PRODUCER ID = " + remoteProducerId)
   
   const stream = await consumeData(transport, remoteProducerId)
-  console.log(stream) 
-  stream.on('open', () =>{
-    console.log('stream open')
-  })
   stream.on('message', async (data) => {
 
     const chat = document.getElementById('chatWindow')

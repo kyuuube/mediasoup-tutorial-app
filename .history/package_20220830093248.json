@@ -14,7 +14,7 @@
     "fs": "0.0.1-security",
     "https": "^1.0.0",
     "mediasoup": "^3.9.12",
-    "mediasoup-client": "3.6.57",
+    "mediasoup-client": "^3.6.51",
     "socket.io": "^4.5.0",
     "socket.io-client": "^4.5.0"
   }

@@ -107,7 +107,9 @@ async function initializeDataChannel(){
     return;
   }
 
-  const transport = device.createSendTransport({...data});
+  const transport = device.createSendTransport({...data, iceServers : [ {
+    'urls' : 'stun:stun1.l.google.com:19302'
+  }]});
 
   transport.on('connect', async ({ dtlsParameters, sctpParameters }, callback, errback) => {
     console.log("Connected to the transport for data channel")
@@ -180,7 +182,9 @@ async function publish(e) {
     return;
   }
 
-  const transport = device.createSendTransport({...data});
+  const transport = device.createSendTransport({...data, iceServers : [ {
+    'urls' : 'stun:stun1.l.google.com:19302'
+  }]});
   transport.on('connect', async ({ dtlsParameters, sctpParameters }, callback, errback) => {
     socket.request('connectProducerTransport', { dtlsParameters, sctpParameters })
       .then(callback)
@@ -282,7 +286,9 @@ async function subscribe(remoteProducerId) {
   }
   console.log("Created consumer transport with id")
 
-  const transport = device.createRecvTransport({...data});
+  const transport = device.createRecvTransport({...data, iceServers : [ {
+    'urls' : 'stun:stun1.l.google.com:19302'
+  }]});
 
   transport.on('connect', ({ dtlsParameters }, callback, errback) => {
     console.log("Connected to the transport")
@@ -342,7 +348,9 @@ async function subcribeToDataChannel(remoteProducerId) {
   }
   console.log("Created consumer transport with id")
 
-  const transport = device.createRecvTransport({...data});
+  const transport = device.createRecvTransport({...data, iceServers : [ {
+    'urls' : 'stun:stun1.l.google.com:19302'
+  }]});
   
   transport.on('connect', ({ dtlsParameters }, callback, errback) => {
     console.log("Connected to the data consumer transport")
@@ -355,6 +363,7 @@ async function subcribeToDataChannel(remoteProducerId) {
       .catch(errback);
   });
   transport.on('connectionstatechange', async (state) => {
+    console.log(state)
     switch (state) {
       case 'connecting':
         console.log("Connecting to consumer for data transport = " + transport.id)
@@ -368,7 +377,6 @@ async function subcribeToDataChannel(remoteProducerId) {
         break;
 
       case 'failed':
-      case 'disconnected':
         transport.close();
         console.log("Consumer failed")
         break;
@@ -380,10 +388,6 @@ async function subcribeToDataChannel(remoteProducerId) {
   console.log("REMOTE PRODUCER ID = " + remoteProducerId)
   
   const stream = await consumeData(transport, remoteProducerId)
-  console.log(stream) 
-  stream.on('open', () =>{
-    console.log('stream open')
-  })
   stream.on('message', async (data) => {
 
     const chat = document.getElementById('chatWindow')

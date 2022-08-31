@@ -195,7 +195,6 @@ async function runSocketServer() {
 
     socket.on('connectDataConsumerTransport', async (data, callback) => {
       console.log("Connecting Data Consumer Transport")
-      console.log(data)
       const consumerTransport = transports.find(transportData => (
         transportData.consumer && transportData.transport.id == data.transportId && data.dataChannel
       )).transport
@@ -214,7 +213,7 @@ async function runSocketServer() {
         console.log('transport for this producer closed ')
         producer.close()
       })
-      console.log(producers)
+
       callback({ id: producer.id, producersExist: producers.length>0 ? true : false });
       addProducer(producer, roomName, socket.id, false)
       informConsumers(roomName, socket.id, producer.id)
