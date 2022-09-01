@@ -133,7 +133,7 @@ async function initializeDataChannel() {
     }
   });
 
-  dataChannelProducer = await transport.produceData()
+  dataChannelProducer = transport.produceData()
 
 }
 
@@ -141,13 +141,17 @@ function sendMessage() {
   console.log("Sending message to the server")
   let message = document.getElementById("chatInput").value
 
-  dataChannelProducer.send(message)
-  const chat = document.getElementById('chatWindow')
+  dataChannelProducer.then((produce) => {
+    produce.on("open", () => {
+      console.log("open")
+      produce.send(message);
+    })
+    const chat = document.getElementById('chatWindow')
 
-  const newElem = document.createElement('div')
+    const newElem = document.createElement('div')
 
-  //append to the audio container
-  newElem.innerHTML = '<article class="msg-container msg-self" id="msg-0"> \
+    //append to the audio container
+    newElem.innerHTML = '<article class="msg-container msg-self" id="msg-0"> \
                             <div class="msg-box"> \
                               <div class="flr"> \
                                   <div class="messages">\
@@ -161,8 +165,8 @@ function sendMessage() {
                             </div> \
                           </article>'
 
-  chatWindow.appendChild(newElem)
-})
+    chatWindow.appendChild(newElem)
+  })
 
 }
 async function publish(e) {

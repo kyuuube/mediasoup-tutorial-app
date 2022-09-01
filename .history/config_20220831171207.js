@@ -50,11 +50,17 @@ module.exports = {
       listenIps: [
         {
           ip: '0.0.0.0',
-          announcedIp: '192.168.100.137' ,
+          announcedIp: 'publicIp' ,
         }
       ],
       maxIncomingBitrate: 1500000,
       initialAvailableOutgoingBitrate: 1000000,
+      enableUdp: true,
+      enableTcp: true,
+      preferUdp: true,
+      minimumAvailableOutgoingBitrate: 600000,
+      maxSctpMessageSize: 262144,
+      maxIncomingBitrate: 1500000,
     }
   }
 };

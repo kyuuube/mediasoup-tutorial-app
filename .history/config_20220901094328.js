@@ -49,7 +49,7 @@ module.exports = {
     webRtcTransport: {
       listenIps: [
         {
-          ip: '0.0.0.0',
+          ip: '192.168.100.137',
           announcedIp: '192.168.100.137' ,
         }
       ],

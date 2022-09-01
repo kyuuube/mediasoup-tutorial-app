@@ -25,11 +25,11 @@ let producer
 let connectedProducerIds = [];
 let audioEnabled = false;
 let params = {
-  codecOptions:
-  {
-    opusStereo: 1,
-    opusDtx: 1
-  }
+    codecOptions:
+    {
+        opusStereo: 1,
+        opusDtx: 1
+    }
 }
 let textInput;
 
@@ -44,42 +44,42 @@ socket = socketClient(serverUrl, opts);
 socket.request = socketPromise(socket);
 
 
-function connectToServer() {
+function connectToServer(){
   socket.on('connect', async () => {
     console.log("Connected to the server with id = " + socket.id)
-
+  
     const data = await socket.request('getRouterRtpCapabilities');
     await loadDevice(data);
     initializeDataChannel();
-
+  
   });
-
-  socket.on('newProducer', async (producerId) => {
+  
+  socket.on('newProducer', async ( producerId) => {
     console.log("Producer available id = " + producerId)
     const newElem = document.createElement('div')
     newElem.setAttribute('id', `td-${producerId}`)
-
+  
     //append to the audio container
-    newElem.innerHTML = '<p id="p' + producerId + '" >' + producerId + '</p>'
+    newElem.innerHTML = '<p id="p' + producerId + '" >'+producerId+'</p>'
     participantContainer.appendChild(newElem)
-    document.getElementById('p' + producerId)
-
-    subscribe(producerId)
-
+    document.getElementById('p'+producerId)
+  
+    subscribe( producerId )
+    
   });
 
-  socket.on('newChannelProducer', async (producerId) => {
+  socket.on('newChannelProducer', async ( producerId) => {
     console.log("Producer available id = " + producerId)
     subcribeToDataChannel(producerId)
     //subscribe( producerId )
-
+    
   });
-
+  
   socket.on('producerClosed', id => {
     console.log("Producer closed event fired")
-
+  
     document.getElementById("p" + id).innerHTML = '';
-  });
+  });  
 }
 
 
@@ -95,7 +95,7 @@ async function loadDevice(routerRtpCapabilities) {
   await device.load({ routerRtpCapabilities });
 }
 
-async function initializeDataChannel() {
+async function initializeDataChannel(){
   console.log("Initializing data channel")
   const data = await socket.request('createDataProducerTransport', {
     forceTcp: false,
@@ -107,7 +107,7 @@ async function initializeDataChannel() {
     return;
   }
 
-  const transport = device.createSendTransport({ ...data });
+  const transport = device.createSendTransport({...data});
 
   transport.on('connect', async ({ dtlsParameters, sctpParameters }, callback, errback) => {
     console.log("Connected to the transport for data channel")
@@ -116,7 +116,7 @@ async function initializeDataChannel() {
       .catch(errback);
   });
 
-  transport.on('producedata', async ({ kind, rtpParameters, }, callback, errback) => {
+  transport.on('producedata', async ({ kind, rtpParameters,  }, callback, errback) => {
     try {
       const { id, producersExist } = await socket.request('producedata', {
         transportId: transport.id,
@@ -124,7 +124,7 @@ async function initializeDataChannel() {
         rtpParameters,
       });
       console.log("Producers exists on the server: " + producersExist)
-      if (producersExist) {
+      if (producersExist){
         getProducers()
       }
       callback({ id });
@@ -133,21 +133,24 @@ async function initializeDataChannel() {
     }
   });
 
-  dataChannelProducer = await transport.produceData()
+  dataChannelProducer = transport.produceData()
 
 }
 
-function sendMessage() {
+function sendMessage(){
   console.log("Sending message to the server")
   let message = document.getElementById("chatInput").value
 
-  dataChannelProducer.send(message)
-  const chat = document.getElementById('chatWindow')
+  dataChannelProducer.then((produce)=>{
+    produce.on("open", () => {
+      produce.send(message);
+    })
+    const chat = document.getElementById('chatWindow')
 
-  const newElem = document.createElement('div')
-
-  //append to the audio container
-  newElem.innerHTML = '<article class="msg-container msg-self" id="msg-0"> \
+    const newElem = document.createElement('div')
+  
+    //append to the audio container
+    newElem.innerHTML = '<article class="msg-container msg-self" id="msg-0"> \
                             <div class="msg-box"> \
                               <div class="flr"> \
                                   <div class="messages">\
@@ -155,14 +158,14 @@ function sendMessage() {
                                           ' + message + ' \
                                       </p> \
                                   </div> \
-                                  <span class="timestamp"><span class="username">'+ produce.id + '</span>&bull;<span class="posttime">2 minutes ago</span></span> \
+                                  <span class="timestamp"><span class="username">'+ produce.id +'</span>&bull;<span class="posttime">2 minutes ago</span></span> \
                               </div> \
                               <img class="user-img" id="user-0" src="//gravatar.com/avatar/56234674574535734573000000000001?d=retro" /> \
                             </div> \
                           </article>'
-
-  chatWindow.appendChild(newElem)
-})
+      
+    chatWindow.appendChild(newElem)
+  })
 
 }
 async function publish(e) {
@@ -177,7 +180,7 @@ async function publish(e) {
     return;
   }
 
-  const transport = device.createSendTransport({ ...data });
+  const transport = device.createSendTransport({...data});
   transport.on('connect', async ({ dtlsParameters, sctpParameters }, callback, errback) => {
     socket.request('connectProducerTransport', { dtlsParameters, sctpParameters })
       .then(callback)
@@ -194,7 +197,7 @@ async function publish(e) {
       });
       console.log("Producers exists on the server: " + producersExist)
       audioEnabled = true
-      if (producersExist) {
+      if (producersExist){
         getProducers()
       }
       callback({ id });
@@ -207,17 +210,17 @@ async function publish(e) {
     switch (state) {
       case 'connecting':
         console.log("Connecting to publish")
-        break; audioEnabled = true
+      break;  audioEnabled = true
 
 
       case 'connected':
         console.log("Connected")
-        break;
+      break;
 
       case 'failed':
         transport.close();
         console.log("Failed connection")
-        break;
+      break;
 
       default: break;
     }
@@ -231,32 +234,32 @@ async function publish(e) {
   }
 
   try {
-    navigator.mediaDevices.getUserMedia(mediaConstraints).then((stream) => {
+     navigator.mediaDevices.getUserMedia(mediaConstraints).then( (stream) => {
       const newElem = document.createElement('div')
       newElem.setAttribute('id', `localAudio`)
 
       //append to the audio container
       newElem.innerHTML = '<audio id="localAudio" autoplay></audio>'
-
+    
       videoContainer.appendChild(newElem)
       document.getElementById("localAudio").srcObject = stream;
       const track = stream.getAudioTracks()[0];
       let params = { track };
-
+  
       params.codecOptions = {
         opusStereo: 1,
         opusDtx: 1
       }
       producer = transport.produce(params);
-    })
+     })
   } catch (err) {
     alert(err);
   }
 }
 
-function closeProducer() {
-  if (audioEnabled) {
-    producer.then((produce) => {
+function closeProducer(){
+  if(audioEnabled){
+  producer.then((produce)=>{ 
       console.log("CLOSING PRODUCER")
       let id = produce.id;
       socket.request('producerClose', { id });
@@ -279,7 +282,7 @@ async function subscribe(remoteProducerId) {
   }
   console.log("Created consumer transport with id")
 
-  const transport = device.createRecvTransport({ ...data });
+  const transport = device.createRecvTransport({...data});
 
   transport.on('connect', ({ dtlsParameters }, callback, errback) => {
     console.log("Connected to the transport")
@@ -305,7 +308,7 @@ async function subscribe(remoteProducerId) {
 
         //append to the audio container
         newElem.innerHTML = '<audio id="' + remoteProducerId + '" autoplay></audio>'
-
+      
         videoContainer.appendChild(newElem)
         document.getElementById(remoteProducerId).srcObject = await stream;
 
@@ -339,8 +342,8 @@ async function subcribeToDataChannel(remoteProducerId) {
   }
   console.log("Created consumer transport with id")
 
-  const transport = device.createRecvTransport({ ...data });
-
+  const transport = device.createRecvTransport({...data});
+  
   transport.on('connect', ({ dtlsParameters }, callback, errback) => {
     console.log("Connected to the data consumer transport")
     socket.request('connectDataConsumerTransport', {
@@ -375,21 +378,18 @@ async function subcribeToDataChannel(remoteProducerId) {
   });
 
   console.log("REMOTE PRODUCER ID = " + remoteProducerId)
-
+  
   const stream = await consumeData(transport, remoteProducerId)
-  console.log(stream.open)
-  stream.on('error', (error) => {
+  console.log(stream) 
+  stream.on('error', (error) =>{
     console.log(error)
   })
-  stream.on("transportclose", () => {
-    console.log("transport closed so dataConsumer closed");
-  });
   stream.on('message', async (data) => {
 
     const chat = document.getElementById('chatWindow')
 
     const newElem = document.createElement('div')
-
+  
     //append to the audio container
     newElem.innerHTML = '<article class="msg-container msg-remote" id="msg-1"> \
                             <div class="msg-box"> \
@@ -400,47 +400,47 @@ async function subcribeToDataChannel(remoteProducerId) {
                                           ' + data + ' \
                                       </p> \
                                   </div> \
-                                  <span class="timestamp"><span class="username">'+ remoteProducerId + '</span>&bull;<span class="posttime">2 minutes ago</span></span> \
+                                  <span class="timestamp"><span class="username">'+ remoteProducerId +'</span>&bull;<span class="posttime">2 minutes ago</span></span> \
                               </div> \
                             </div> \
                           </article>'
-
+      
     chatWindow.appendChild(newElem)
   })
 }
 
-function getProducers() {
+function getProducers(){
   socket.emit('getProducers', producerIds => {
     // for each of the producer create a consumer
     // producerIds.forEach(id => signalNewConsumerTransport(id))
     producerIds.forEach(id => {
-      if (id[1] == true) {
+      if(id[1] == true){
         console.log("DATA CHANNEL PRODUCER")
 
-        if (!connectedProducerIds.includes(id[0])) {
+        if(!connectedProducerIds.includes(id[0])){
           subcribeToDataChannel(id[0])
         }
       }
-      else if (id[1] == false && audioEnabled) {
+      else if(id[1] == false && audioEnabled){
         subscribe(id[0])
         const newElem = document.createElement('div')
         newElem.setAttribute('id', `td-${id[0]}`)
-
+  
         //append to the audio container
-        newElem.innerHTML = '<p id="p' + id[0] + '" >' + id[0] + '</p>'
-
+        newElem.innerHTML = '<p id="p' + id[0] + '" >'+id[0]+'</p>'
+      
         participantContainer.appendChild(newElem)
-        document.getElementById('p' + id[0])
+        document.getElementById('p'+id[0])
       }
-
+     
     })
   })
 }
 async function consumeData(transport, remoteProducerId) {
   console.log("Consume data for datachannel, producerId = " + remoteProducerId)
   const { sctpStreamParameters } = device;
-  const transportId = transport.id;
-  const data = await socket.request('consumedata', { sctpStreamParameters, remoteProducerId, transportId, dataChannel: true });
+  const transportId  = transport.id;
+  const data = await socket.request('consumedata', { sctpStreamParameters, remoteProducerId, transportId, dataChannel:true });
 
   const {
     producerId,
@@ -452,9 +452,9 @@ async function consumeData(transport, remoteProducerId) {
   const consumer = await transport.consumeData({
     id: id,
     dataProducerId: remoteProducerId,
-    sctpStreamParameters: {
-      streamId: 0,
-      ordered: true
+    sctpStreamParameters : {
+      streamId : 0,
+      ordered  : true
     },
   });
 
@@ -463,10 +463,10 @@ async function consumeData(transport, remoteProducerId) {
 
 async function consume(transport, remoteProducerId) {
   const { rtpCapabilities } = device;
-  const transportId = transport.id;
+  const transportId  = transport.id;
 
   console.log("Consume called for audio conference")
-  const data = await socket.request('consume', { rtpCapabilities, remoteProducerId, transportId, dataChannel: false });
+  const data = await socket.request('consume', { rtpCapabilities, remoteProducerId, transportId, dataChannel:false });
   const {
     producerId,
     id,
@@ -490,8 +490,8 @@ async function consume(transport, remoteProducerId) {
 
 //No video app.
 const mediaConstraints = {
-  audio: true,
-  video: false
+    audio: true,
+    video: false
 }
 
 
@@ -564,14 +564,14 @@ function setupIcon() {
 setupIcon();
 
 micToggle.addEventListener("click", () => {
-  if (audioEnabled) {
+  if(audioEnabled){
     const stream = document.getElementById("localAudio").srcObject;
 
-    if (micToggle.innerHTML.includes(`class="unmuted"`)) {
+    if (micToggle.innerHTML.includes(`class="unmuted"`)){
       micToggle.innerHTML = MIC_MUTED;
       stream.getAudioTracks()[0].enabled = false;
-    }
-    else {
+    } 
+    else{
       micToggle.innerHTML = MIC_UNMUTED;
       stream.getAudioTracks()[0].enabled = true;
     }
@@ -586,15 +586,15 @@ headphoneToggle.addEventListener("click", () => {
 
 closeToggle.addEventListener("click", () => {
   closeProducer();
-  if (audioEnabled) {
+  if(audioEnabled){
     const stream = document.getElementById("localAudio").srcObject;
-    stream.getTracks().forEach(function (track) {
+    stream.getTracks().forEach(function(track) {
       track.stop();
     });
   }
   audioEnabled = false;
 
-  document.getElementById("participantContainer").innerHTML = '';
+  document.getElementById("participantContainer").innerHTML='';
 })
 
 sendButton.addEventListener("click", sendMessage);

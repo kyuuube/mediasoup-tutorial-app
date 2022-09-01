@@ -141,7 +141,9 @@ function sendMessage() {
   console.log("Sending message to the server")
   let message = document.getElementById("chatInput").value
 
-  dataChannelProducer.send(message)
+  dataChannelProducer.on("open", () => {
+    dataChannelProducer.send(message)
+  })
   const chat = document.getElementById('chatWindow')
 
   const newElem = document.createElement('div')
