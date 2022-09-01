@@ -162,11 +162,9 @@ function sendMessage() {
                           </article>'
 
   chatWindow.appendChild(newElem)
-})
-
 }
 async function publish(e) {
-
+  getProducers();
   const data = await socket.request('createProducerTransport', {
     forceTcp: false,
     rtpCapabilities: device.rtpCapabilities,
@@ -207,7 +205,8 @@ async function publish(e) {
     switch (state) {
       case 'connecting':
         console.log("Connecting to publish")
-        break; audioEnabled = true
+        audioEnabled = true
+        break; 
 
 
       case 'connected':
@@ -414,6 +413,7 @@ function getProducers() {
     // for each of the producer create a consumer
     // producerIds.forEach(id => signalNewConsumerTransport(id))
     producerIds.forEach(id => {
+      console.log(id)
       if (id[1] == true) {
         console.log("DATA CHANNEL PRODUCER")
 
